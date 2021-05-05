@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 temp_list = []
 new_info = {}
 
-resources_path = "/home/pi/arrivals/audio_files/"
+resources_path = "/home/pi/PicoLA_StopSounds/audio_files/"
 
 def get_API():
 
@@ -106,7 +106,7 @@ def audio():
 
 def speaker(line, minutes):
 
-  os.system("mpg321" + resources_path + line + "_" + minutes + "min.mp3")
+  os.system("mpg321 " + resources_path + line + "_" + minutes + "min.mp3")
   print("Bus " + line + " arrinving in " + minutes)
 
   return 1
