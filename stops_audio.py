@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 temp_list = []
 new_info = {}
 
-resources_path = "/home/pi/audio_files/"
+resources_path = "/home/pi/arrivals/audio_files/"
 
 def get_API():
 
