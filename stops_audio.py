@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime
-#import time, threading
+import time, threading
 import schedule
 import os
 import RPi.GPIO as GPIO
@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 temp_list = []
 new_info = {}
 
-resources_path = "/home/pi/PicoLA_StopSounds/audio_files/"
+resources_path = "/home/pi/audio_files/"
 
 def get_API():
 
@@ -40,27 +40,27 @@ def get_API():
             time_list = info[x]["schedule"].get("times_minutes").split(",")
             new_time = int(time_list[0])
 
-          if "VIA" in info[x]["pattern_name"]:
+          # if "VIA" in info[x]["pattern_name"]:
 
-            name_list = info[x].get("pattern_name").split("VIA")
-            new_name = name_list[0] + "\nVIA" + name_list[1]
+          #   name_list = info[x].get("pattern_name").split("VIA")
+          #   new_name = name_list[0] + "\nVIA" + name_list[1]
 
-            if "-" in new_name:
-              name_list = new_name.split("-")
-              new_name = name_list[0] + "\n" + name_list[1].strip()
+          #   if "-" in new_name:
+          #     name_list = new_name.split("-")
+          #     new_name = name_list[0] + "\n" + name_list[1].strip()
 
-          elif "-" in info[x]["pattern_name"]:
+          # elif "-" in info[x]["pattern_name"]:
 
-            name_list = info[x].get("pattern_name").split("-")
-            new_name = name_list[0] + "\n" + name_list[1].strip()
+          #   name_list = info[x].get("pattern_name").split("-")
+          #   new_name = name_list[0] + "\n" + name_list[1].strip()
 
-            if "-" in new_name:
-              name_list = new_name.split("-")
-              new_name = name_list[0] + "\n" + name_list[1].strip()
+          #   if "-" in new_name:
+          #     name_list = new_name.split("-")
+          #     new_name = name_list[0] + "\n" + name_list[1].strip()
 
-          if "(" in new_name:
-            temp = new_name.split("(")
-            new_name = temp[0] + "\n(" + temp[1]
+          # if "(" in new_name:
+          #   temp = new_name.split("(")
+          #   new_name = temp[0] + "\n(" + temp[1]
 
           route_list = info[x].get("route_name").split(" ")
           new_route = route_list[-1]
@@ -68,12 +68,14 @@ def get_API():
           if new_route[0].isnumeric() == False:
             new_route = info[x].get("route")
 
-          new_info[x] = {"name" : new_name, "route" : new_route, "time" : new_time} 
+          #new_info[x] = {"name" : new_name, "route" : new_route, "time" : new_time} 
+          new_info[x] = {"route" : new_route, "time" : new_time} 
 
         except:
           pass
 
     print(new_info)
+    print()
 
     return True
 
@@ -91,6 +93,9 @@ def audio():
   if get_API():
 
     temp_list = sorted(new_info, key = lambda x:(new_info[x].get("time")))
+    print(temp_list)
+    print("\n")
+
 
     for n in range(0, 6):
 
@@ -100,9 +105,14 @@ def audio():
 
       if remaining_time == "5" or remaining_time == "1":#and speaker_flag == 0:
         GPIO.output(19, GPIO.HIGH)
-        speaker_flag = speaker(lines, remaining_time)
-        GPIO.output(19, GPIO.LOW)
+        os.system("/opt/vc/bin/tvservice -p")
+        time.sleep(1)
 
+        speaker_flag = speaker(lines, remaining_time)
+
+        GPIO.output(19, GPIO.LOW)
+        os.system("/opt/vc/bin/tvservice -o")
+        time.sleep(1)
 
 def speaker(line, minutes):
 
@@ -118,6 +128,8 @@ def main():
   GPIO.setmode(GPIO.BCM)
   GPIO.setup(19, GPIO.OUT)
   GPIO.output(19, GPIO.LOW)
+  os.system("/opt/vc/bin/tvservice -o")
+  time.sleep(1)
 
   audio()
 
@@ -126,6 +138,7 @@ def main():
   while True:
 
     schedule.run_pending()
+    time.sleep(20)
 
 
 if __name__=="__main__":
